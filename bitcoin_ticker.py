@@ -18,4 +18,4 @@ while True:
   f.write("{},{},{}".format(price["btc_usd"]["high"],price["btc_usd"]["low"],price["btc_usd"]["avg"]))
   f.write("\n")
   f.flush()
-  time.sleep(9*60)
+  time.sleep(5*60)
