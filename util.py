@@ -43,16 +43,24 @@ def reduceMatRows(data):
             data[t][i] = v[t]
 
     return data
+def reduceCurrent(data):
+    for i in range(len(data)):
+        data[i] = reduceValue(data[i],mins[i],maxs[i])
+    return data
 
 def getCurrentData(label=False):
-  data = requests.get("https://api.blockchain.info/stats").json()
-  price = requests.get("https://www.bitstamp.net/api/v2/ticker/btcusd/").json()
+  keys = ["price_usd","24h_volume_usd","market_cap_usd","available_supply","total_supply","percent_change_1h","percent_change_24h","percent_change_7d"]
   vect = []
+  data = requests.get("https://api.coinmarketcap.com/v1/ticker/bitcoin/").json()[0]
+  bstamp = requests.get("https://www.bitstamp.net/api/v2/ticker/btcusd/").json()
+  bkc = requests.get("https://blockchain.info/ticker").json()
   for i in data.keys():
-    if "{}".format(i) != "timestamp" and "{}".format(i) != "market_price_usd":
+    if i in keys:
       vect.append(float(data[i]))
-  vect.append(float(price["bid"]))
-  vect.append(float(price["ask"]))
+  vect.append(float(bstamp["volume"]))
+  vect.append(float(bstamp["vwap"]))
+  vect.append(float(bkc["USD"]["sell"]))
+  vect.append(float(bkc["USD"]["buy"]))
 
-  if label:return vect,float(price["last"])
+  if label:return vect,float(bkc["USD"]["15m"])
   else : return vect
