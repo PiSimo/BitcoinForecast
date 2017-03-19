@@ -12,7 +12,6 @@ keys = ["price_usd","24h_volume_usd","market_cap_usd","available_supply","total_
 
 while True:
   data = requests.get("https://api.coinmarketcap.com/v1/ticker/bitcoin/").json()[0]
-#  price = requests.get("https://btc-e.com/api/3/ticker/btc_usd").json()
   bstamp = requests.get("https://www.bitstamp.net/api/v2/ticker/btcusd/").json() 
   bkc = requests.get("https://blockchain.info/ticker").json()
   for i in data.keys():
