@@ -18,12 +18,12 @@ def main():
     net = Sequential()
     net.add(Dense(12,init="glorot_uniform",input_dim=12,activation='linear'))
     net.add(Reshape((1,12)))
-    net.add(GRU(35,init="glorot_uniform",activation='sigmoid',return_sequences=True))
+    net.add(GRU(50,init="glorot_uniform",activation='sigmoid',return_sequences=True))
     net.add(Dropout(0.4))
-    net.add(GRU(60,init="glorot_uniform",activation='sigmoid',return_sequences=False))
+    net.add(GRU(70,init="glorot_uniform",activation='sigmoid',return_sequences=False))
     net.add(Dropout(0.3))
     net.add(Dense(1,init="glorot_uniform",activation='linear'))
-    net.compile(optimizer=SGD(lr=.01,momentum=.9,nesterov=True),loss='mean_squared_logarithmic_error')
+    net.compile(optimizer='rmsprop',loss='mean_squared_logarithmic_error')
     print("done!")
 
     #Data
