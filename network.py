@@ -4,7 +4,7 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.optimizers import SGD
+
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,GRU,Reshape
 
@@ -42,14 +42,14 @@ def main():
 
     reals,preds = [],[]
     sm = 0
-    for i in range(len(data)):
+    for i in range(len(data)): 
         x = np.array(data[i]).reshape(1,12)
         predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
         real = util.augmentValue(labels[i],m1,m2)
         preds.append(predicted)
         reals.append(real)
         sm = abs(real-predicted)
-        if i > (len(data)-17):print("Real:{} Predicted:{} ".format(real,predicted))
+       
     sm /= len(data)
     print("Average Likehood:{}".format(sm))
 
