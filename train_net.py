@@ -4,7 +4,6 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,GRU,Reshape
 
@@ -27,35 +26,40 @@ def main():
 
     #Data
     print("Loading data...",end="")
-    f = open(file_name,'r')
-    data,labels = util.loadData(f)
+    d = open(file_name,'r')
+    data,labels = util.loadData(d)
     data = util.reduceMatRows(data)
     labels,m1,m2 =util.reduceVector(labels,getVal=True)
-    labels =labels
+
+    #Writing min and max values to file 
+    f = open("minmax.csv","w")
+    for i in range(len(util.maxs)):
+        f.write("{},{}\n".format(util.maxs[i],util.mins[i]))
+    f.write("{},{}".format(m1,m2))
+    f.close()
+
     print("{} chunk loaded!\nTraining...".format(len(labels)),end="")
 
     #Training dnn
-    net.fit(data,labels,nb_epoch=200)
+    net.fit(data,labels,nb_epoch=300)
 
     print("trained!\nSaving...")
-    net.save
+    net.save("model.h5")
 
     reals,preds = [],[]
-    sm = 0
-    for i in range(len(data)): 
+
+    for i in range(len(data)):
         x = np.array(data[i]).reshape(1,12)
         predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
         real = util.augmentValue(labels[i],m1,m2)
         preds.append(predicted)
         reals.append(real)
-        sm = abs(real-predicted)
-       
-    sm /= len(data)
-    print("Average Likehood:{}".format(sm))
 
-#    actual = np.array(util.reduceCurrent(util.getCurrentData())).reshape(1,12)
-#    pred = util.augmentValue(net.predict(actual)[0],m1,m2)
-#    print("At {} predicted next 15m:{}$".format(time.strftime("%H:%M:%S"),pred[0]))
+    print("Average Likehood:{}".format(sm))
+    actual,latest_p = util.getCurrentData(label=True)
+    actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
+    pred = util.augmentValue(net.predict(actual)[0],m1,m2)
+    print("[{}] Actual:{}$ Next 15m:{}$".format(time.strftime("%H:%M:%S"),latest_p,pred[0]))
 
     ### PLOTTING
     plt.plot(reals,color='g')
