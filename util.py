@@ -45,7 +45,7 @@ def reduceMatRows(data):
     return data
 def reduceCurrent(data):
     for i in range(len(data)):
-        data[i] = reduceValue(data[i],mins[i],maxs[i])
+        data[i] = reduceValue(data[i],maxs[i],mins[i])
     return data
 
 def getCurrentData(label=False):
