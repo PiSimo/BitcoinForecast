@@ -44,7 +44,7 @@ def main():
     net.fit(data,labels,nb_epoch=300)
 
     print("trained!\nSaving...")
-    net.save("model.h5")
+    net.save_weights("model.h5")
 
     reals,preds = [],[]
 
@@ -55,7 +55,6 @@ def main():
         preds.append(predicted)
         reals.append(real)
 
-    print("Average Likehood:{}".format(sm))
     actual,latest_p = util.getCurrentData(label=True)
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
