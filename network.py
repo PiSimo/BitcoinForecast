@@ -18,8 +18,11 @@ def main():
     net.add(Dense(12,init=w_init,input_dim=12,activation='linear'))
     net.add(Reshape((1,12)))
     net.add(GRU(50,init=w_init,activation='sigmoid',return_sequences=True))
+    net.add(GRU(70,init=w_init,activation='sigmoid',return_sequences=True))
     net.add(Dropout(0.4))
-    net.add(GRU(70,init=w_init,activation='sigmoid',return_sequences=False))
+    net.add(GRU(50,init=w_init,activation='sigmoid',return_sequences=True))
+    net.add(Dropout(0.4))
+    net.add(GRU(12,init=w_init,activation='sigmoid',return_sequences=False))
     net.add(Dense(1,init=w_init,activation='linear'))
     net.compile(optimizer='rmsprop',loss='mse')#mean_squared_logarithmic_error
     print("done!")
@@ -31,23 +34,17 @@ def main():
     data = util.reduceMatRows(data)
     labels,m1,m2 =util.reduceVector(labels,getVal=True)
 
-    #Writing min and max values to file 
-    f = open("minmax.csv","w")
-    for i in range(len(util.maxs)):
-        f.write("{},{}\n".format(util.maxs[i],util.mins[i]))
-    f.write("{},{}".format(m1,m2))
-    f.close()
-
     print("{} chunk loaded!\nTraining...".format(len(labels)),end="")
 
     #Training dnn
-    net.fit(data,labels,nb_epoch=300)
+    net.fit(data,labels,nb_epoch=470,batch_size=10)
 
     print("trained!\nSaving...")
     net.save_weights("model.h5")
 
     reals,preds = [],[]
 
+    ### Predict all over the dataset to build the chart
     for i in range(len(data)):
         x = np.array(data[i]).reshape(1,12)
         predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
@@ -66,5 +63,6 @@ def main():
     plt.ylabel('BTC/USD')
     plt.xlabel("15Minute")
     plt.show()
+
 if __name__ == '__main__':
     main()
