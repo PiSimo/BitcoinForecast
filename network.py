@@ -4,7 +4,7 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from sys import argv,exit
+from sys          import argv,exit
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,GRU,Reshape
 
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     net.compile(optimizer='rmsprop',loss='mse')#mean_squared_logarithmic_error
     print("done!")
 
+    
 
     #Loading Data (necessary also for running it to normalize data)
     print("Loading data...",end="")
