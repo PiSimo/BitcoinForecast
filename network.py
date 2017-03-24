@@ -4,24 +4,26 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from sys          import argv,exit
+from sys import argv,exit,stdout
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,GRU,Reshape
+from keras.layers.normalization import BatchNormalization
 
 file_name = 'dataset.csv'
 leng = 12
 net = None
 w_init ="glorot_uniform"
 act    ="tanh"
-wait_time = 2*60
+wait_time = 9*60
 
-def predictNext15m(m1,m2,old_pred):
+def predictFuture(m1,m2,old_pred):
     print("Fetching data...",end="")
+    stdout.flush()
     actual,latest_p = util.getCurrentData(label=True)
     print("!")
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
-    print("[{}] Actual:{}$ Last Prediction:{}$ Next 15m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred[0]))
+    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,round(old_pred),round(pred[0])))
     return latest_p,pred[0]
 
 if __name__ == '__main__':
@@ -30,22 +32,24 @@ if __name__ == '__main__':
         exit(-1)
 
     #Building network
+
     print("Building net..",end="")
     net = Sequential()
     net.add(Dense(12,init=w_init,input_dim=12,activation='linear'))
     net.add(Reshape((1,12)))
-    net.add(GRU(30,init=w_init,activation=act,return_sequences=True))
-    net.add(GRU(50,init=w_init,activation=act,return_sequences=True))
+    net.add(BatchNormalization())
+    net.add(GRU(40,init=w_init,activation=act,return_sequences=True))
     net.add(Dropout(0.4))
-    net.add(GRU(90,init=w_init,activation=act,return_sequences=True))
-    net.add(GRU(61,init=w_init,activation=act,return_sequences=True))
+    net.add(GRU(70,init=w_init,activation=act,return_sequences=True))
+    net.add(Dropout(0.3))
+    net.add(GRU(70,init=w_init,activation=act,return_sequences=True))
     net.add(Dropout(0.4))
-    net.add(GRU(10,init=w_init,activation=act,return_sequences=False))
+    net.add(GRU(40,init=w_init,activation=act,return_sequences=False))
+    net.add(Dropout(0.4))
     net.add(Dense(1,init=w_init,activation='linear'))
-    net.compile(optimizer='rmsprop',loss='mse')#mean_squared_logarithmic_error
+    net.compile(optimizer='rmsprop',loss='mean_squared_logarithmic_error')
     print("done!")
 
-    
 
     #Loading Data (necessary also for running it to normalize data)
     print("Loading data...",end="")
@@ -53,7 +57,7 @@ if __name__ == '__main__':
     data,labels = util.loadData(d)
     data = util.reduceMatRows(data)
     labels,m1,m2 =util.reduceVector(labels,getVal=True)
-    print("{} chunk loaded!\nTraining...".format(len(labels)),end="")
+    print("{} chunk loaded!\n".format(len(labels)),end="")
 
     if argv[1] == 'run':
         #Loading weights
@@ -63,32 +67,37 @@ if __name__ == '__main__':
         old_pred = 0
         while True:
             try:
-                a,b = predictNext15m(m1,m2,old_pred)
+                a,b = predictFuture(m1,m2,old_pred)
                 old_pred = b
                 time.sleep(wait_time)
             except KeyboardInterrupt:
-                print("[!]Closing main loop",end="")
+                print("\b\b\b\b\b\b[!]Closing main loop",end="")
                 break
         print("!")
     elif argv[1] == 'train':
         #Training dnn
         print("training...")
-        net.fit(data,labels,nb_epoch=1001,batch_size=45)
+        el = len(data)-30
+        eval_d = data[el:]
+        eval_l = labels[el:]
+        data = data[:el]
+        labels = labels[:el]
+        net.fit(data,labels,nb_epoch=400,batch_size=270)
         print("trained!\nSaving...",end="")
         net.save_weights("model.h5")
         print("saved!")
 
         ### Predict all over the dataset to build the chart
         reals,preds = [],[]
-        for i in range(len(data)):
-            x = np.array(data[i]).reshape(1,12)
+        for i in range(len(eval_d)):
+            x = np.array(eval_d[i]).reshape(1,12)
             predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
-            real = util.augmentValue(labels[i],m1,m2)
+            real = util.augmentValue(eval_l[i],m1,m2)
             preds.append(predicted)
             reals.append(real)
 
-        ### Predict Price for the next 15m
-        real,hip = predictNext15m(m1,m2)
+        ### Predict Price for the future (magic)
+        real,hip = predictFuture(m1,m2,0)
         reals.append(real)
         preds.append(hip)
 
@@ -96,8 +105,10 @@ if __name__ == '__main__':
         plt.plot(reals,color='g')
         plt.plot(preds,color='r')
         plt.ylabel('BTC/USD')
-        plt.xlabel("15Minute")
+        plt.xlabel("9Minute")
+        plt.savefig("chart.png")
         plt.show()
+
 
     else :
         print("Wrong argument")
