@@ -14,6 +14,6 @@ Requirements:
 <hr />
 <br />
 <br/>
-Testing example with this <a href="https://github.com/PiSimo/BitcoinForecast/blob/master/model.h5">model</a>:
+Working example with this <a href="https://github.com/PiSimo/BitcoinForecast/blob/master/model.h5">model</a>:
 <img src="https://cloud.githubusercontent.com/assets/17238972/24326997/630cf3c2-11bc-11e7-8edb-07be895e16ea.png" />
 
