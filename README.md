@@ -15,5 +15,7 @@ Requirements:
 <br />
 <br/>
 Working example with <a href="https://github.com/PiSimo/BitcoinForecast/blob/master/model.h5">this model</a>:
+<br/>
+(Red:Predicted,Green:Real values)
 <img src="https://cloud.githubusercontent.com/assets/17238972/24326997/630cf3c2-11bc-11e7-8edb-07be895e16ea.png" />
 
