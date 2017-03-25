@@ -4,52 +4,50 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from sys import argv,exit,stdout
+from sys import argv,exit
 from keras.models import Sequential
 from keras.layers import Dense,Dropout,GRU,Reshape
 from keras.layers.normalization import BatchNormalization
 
 file_name = 'dataset.csv'
-leng = 12
 net = None
-w_init ="glorot_uniform"
-act    ="tanh"
 wait_time = 9*60
 
+def buildNet(w_init="glorot_uniform",act="tanh"):
+    global net
+    print("Building net..",end="")
+    net = Sequential()
+    net.add(Dense(12,kernel_initializer=w_init,input_dim=12,activation='linear'))
+    net.add(Reshape((1,12)))
+    net.add(BatchNormalization())
+    net.add(GRU(40,kernel_initializer=w_init,activation=act,return_sequences=True))
+    net.add(Dropout(0.4))
+    net.add(GRU(70,kernel_initializer=w_init,activation=act,return_sequences=True))
+    net.add(Dropout(0.3))
+    net.add(GRU(70,kernel_initializer=w_init,activation=act,return_sequences=True))
+    net.add(Dropout(0.4))
+    net.add(GRU(40,kernel_initializer=w_init,activation=act,return_sequences=False))
+    net.add(Dropout(0.4))
+    net.add(Dense(1,kernel_initializer=w_init,activation='linear'))
+    net.compile(optimizer='nadam',loss='mse') #'mean_squared_logarithmic_error')
+    print("done!")
+
 def predictFuture(m1,m2,old_pred):
-    print("Fetching data...",end="")
-    stdout.flush()
     actual,latest_p = util.getCurrentData(label=True)
-    print("!")
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
-    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,round(old_pred),round(pred[0])))
+    pred = float(int(pred*100)/100)
+    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred[0]))
     return latest_p,pred[0]
+
 
 if __name__ == '__main__':
     if len(argv) != 2:
         print(argv[0]+" train/run")
         exit(-1)
 
-    #Building network
-
-    print("Building net..",end="")
-    net = Sequential()
-    net.add(Dense(12,init=w_init,input_dim=12,activation='linear'))
-    net.add(Reshape((1,12)))
-    net.add(BatchNormalization())
-    net.add(GRU(40,init=w_init,activation=act,return_sequences=True))
-    net.add(Dropout(0.4))
-    net.add(GRU(70,init=w_init,activation=act,return_sequences=True))
-    net.add(Dropout(0.3))
-    net.add(GRU(70,init=w_init,activation=act,return_sequences=True))
-    net.add(Dropout(0.4))
-    net.add(GRU(40,init=w_init,activation=act,return_sequences=False))
-    net.add(Dropout(0.4))
-    net.add(Dense(1,init=w_init,activation='linear'))
-    net.compile(optimizer='rmsprop',loss='mean_squared_logarithmic_error')
-    print("done!")
-
+    #Assembling Net:
+    buildNet()
 
     #Loading Data (necessary also for running it to normalize data)
     print("Loading data...",end="")
@@ -64,35 +62,45 @@ if __name__ == '__main__':
         w_name = input("Weight file:")
         net.load_weights(w_name)
         print("Starting main loop...")
-        old_pred = 0
+        hip = 0
+        reals,preds = [],[]
+        for i in range(len(data)-40,len(data)):
+            x = np.array(data[i]).reshape(1,12)
+            predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
+            real = util.augmentValue(labels[i],m1,m2)
+            preds.append(predicted)
+            reals.append(real)
         while True:
             try:
-                a,b = predictFuture(m1,m2,old_pred)
-                old_pred = b
+                real,hip = predictFuture(m1,m2,hip)
+                reals.append(real)
+                preds.append(hip)
                 time.sleep(wait_time)
             except KeyboardInterrupt:
-                print("\b\b\b\b\b\b[!]Closing main loop",end="")
+                ### PLOTTING
+                plt.plot(reals,color='g')
+                plt.plot(preds,color='r')
+                plt.ylabel('BTC/USD')
+                plt.xlabel("9Minute")
+                plt.savefig("run_chart.png")
+                print("Chart saved!")
                 break
-        print("!")
+        print("Closing..")
     elif argv[1] == 'train':
         #Training dnn
         print("training...")
-        el = len(data)-30
-        eval_d = data[el:]
-        eval_l = labels[el:]
-        data = data[:el]
-        labels = labels[:el]
-        net.fit(data,labels,nb_epoch=400,batch_size=270)
+        el = len(data)-10
+        net.fit(data[:el],labels[:el],epochs=500,batch_size=300)
         print("trained!\nSaving...",end="")
         net.save_weights("model.h5")
         print("saved!")
 
         ### Predict all over the dataset to build the chart
         reals,preds = [],[]
-        for i in range(len(eval_d)):
-            x = np.array(eval_d[i]).reshape(1,12)
+        for i in range(len(data)-40,len(data)):
+            x = np.array(data[i]).reshape(1,12)
             predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
-            real = util.augmentValue(eval_l[i],m1,m2)
+            real = util.augmentValue(labels[i],m1,m2)
             preds.append(predicted)
             reals.append(real)
 
