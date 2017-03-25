@@ -7,7 +7,7 @@ Requirements:
 
 <ul>
 <li>Python3</li>
-<li><a href="http://keras.io/">Keras</a></li>
+<li><a href="http://keras.io/">Keras 2</a></li>
 <li><a href="http://www.numpy.org/">numpy</a></li>
 <li><a href="http://matplotlib.org/">MatploitLib</a></li>
 </ul>
