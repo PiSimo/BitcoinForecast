@@ -1,4 +1,4 @@
-# BitcoinForecast (still in Beta)
+# BitcoinForecast 
 
 Predict bitcoin value for the next 9minutes, with Recurrental Neural Network GRU.
 <br />
