@@ -101,8 +101,9 @@ if __name__ == '__main__':
             x = np.array(data[i]).reshape(1,12)
             predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
             real = util.augmentValue(labels[i],m1,m2)
-            preds.append(predicted)
-            reals.append(real)
+            if(i > len(data)-20):
+                preds.append(predicted)
+                reals.append(real)
 
         ### Predict Price for the future (magic)
         real,hip = predictFuture(m1,m2,0)
