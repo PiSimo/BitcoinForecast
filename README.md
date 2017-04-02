@@ -11,7 +11,6 @@ Predict bitcoin value for the next 9minutes, with Recurrental Neural Network GRU
 <li><a href="http://www.numpy.org/">numpy</a></li>
 <li><a href="http://matplotlib.org/">MatploitLib</a></li>
 </ul>
-<hr />
 <br />
 <h1>Instructions</h1>
 <p>Clone the repo:</p>
@@ -20,7 +19,7 @@ git clone https://github.com/PiSimo/BitcoinForecast.git
 </code>
 <br />
 <br />
-<h1>Training on new data:</h1>
+<b>Training on new data:</b>
 <code>python3 network.py train</code>
 <p>Enter the path to your dataset (you can create an updated one with grabber.py).</p>
 <b>Fine tune:</b>
@@ -29,7 +28,7 @@ Then insert the path to the trained model ('model.h5' is already in the folder).
 </p>
 <p>At the end of the training you will have an updated model.h5 with the new weights and you will see a plot with the test results.</p>
 <br />
-<h1>Running:</h1>
+<b>Running:</b>
 <code>python3 network.py run</code>
 <p>Enter your dataset path the same you have used for training (needed for normalization and denormalization)</p>
 <p>Enter your .h5 trained model, and then the main loop will start</p>
