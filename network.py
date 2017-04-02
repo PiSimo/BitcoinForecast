@@ -1,17 +1,15 @@
 import util
 import time
-import math
-import random
 import numpy as np
 import matplotlib.pyplot as plt
-from sys import argv,exit
-from keras.models import Sequential
-from keras.layers import Dense,Dropout,GRU,Reshape
-from keras.layers.normalization import BatchNormalization
+from   sys import argv,exit
+from   keras.models import Sequential
+from   keras.layers import Dense,Dropout,GRU,Reshape
+from   keras.layers.normalization import BatchNormalization
 
-file_name = 'dataset.csv'
+file_name = 'dataset2.csv'
 net = None
-wait_time = 9*60
+wait_time = 530
 
 def buildNet(w_init="glorot_uniform",act="tanh"):
     global net
@@ -29,16 +27,29 @@ def buildNet(w_init="glorot_uniform",act="tanh"):
     net.add(GRU(40,kernel_initializer=w_init,activation=act,return_sequences=False))
     net.add(Dropout(0.4))
     net.add(Dense(1,kernel_initializer=w_init,activation='linear'))
-    net.compile(optimizer='nadam',loss='mse') #'mean_squared_logarithmic_error')
+    net.compile(optimizer='nadam',loss='mse')
     print("done!")
 
-def predictFuture(m1,m2,old_pred):
-    actual,latest_p = util.getCurrentData(label=True)
+def chart(real,predicted,show=True):
+    plt.plot(real,color='g')
+    plt.plot(predicted,color='r')
+    plt.ylabel('BTC/USD')
+    plt.xlabel("9Minutes")
+    plt.savefig("chart.png")
+    if show:plt.show()
+
+def predictFuture(m1,m2,old_pred,writeToFile=False):
+    actual,latest_p = util.getCurrentData(label=True,toFile=True)
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
-    pred = float(int(pred*100)/100)
-    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred[0]))
-    return latest_p,pred[0]
+    pred = float(int(pred[0]*100)/100)
+    if writeToFile:
+        f = open("results","a")
+        f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+        f.close()
+
+    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+    return latest_p,pred
 
 
 if __name__ == '__main__':
@@ -64,32 +75,39 @@ if __name__ == '__main__':
         print("Starting main loop...")
         hip = 0
         reals,preds = [],[]
+
         for i in range(len(data)-40,len(data)):
             x = np.array(data[i]).reshape(1,12)
             predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
             real = util.augmentValue(labels[i],m1,m2)
             preds.append(predicted)
             reals.append(real)
+
         while True:
             try:
-                real,hip = predictFuture(m1,m2,hip)
+                real,hip = predictFuture(m1,m2,hip,writeToFile=True)
                 reals.append(real)
                 preds.append(hip)
                 time.sleep(wait_time)
             except KeyboardInterrupt:
                 ### PLOTTING
-                plt.plot(reals,color='g')
-                plt.plot(preds,color='r')
-                plt.ylabel('BTC/USD')
-                plt.xlabel("9Minute")
-                plt.savefig("run_chart.png")
+                chart(reals,preds,show=False)
                 print("Chart saved!")
-                break
+                s = input("Type yes to close the program: ")
+                if s.lower() == "yes":break
+                print("Resuming...")
+
         print("Closing..")
+
     elif argv[1] == 'train':
+        cho = input("Fine tune model [yes/no] ?")
+        if cho == 'yes':
+            model_name = input('trained model\'s path:')
+            net.load_weights(model_name)
+
         #Training dnn
         print("training...")
-        el = len(data)-10
+        el = len(data)-10     #Last ten elements are for testing
         net.fit(data[:el],labels[:el],epochs=500,batch_size=300)
         print("trained!\nSaving...",end="")
         net.save_weights("model.h5")
@@ -101,23 +119,16 @@ if __name__ == '__main__':
             x = np.array(data[i]).reshape(1,12)
             predicted = util.augmentValue(net.predict(x)[0],m1,m2)[0]
             real = util.augmentValue(labels[i],m1,m2)
-            if(i > len(data)-20):
-                preds.append(predicted)
-                reals.append(real)
+            preds.append(predicted)
+            reals.append(real)
 
-        ### Predict Price for the future (magic)
+        ### Predict Price the next 9m price (magic)
         real,hip = predictFuture(m1,m2,0)
         reals.append(real)
         preds.append(hip)
 
         ### PLOTTING
-        plt.plot(reals,color='g')
-        plt.plot(preds,color='r')
-        plt.ylabel('BTC/USD')
-        plt.xlabel("9Minute")
-        plt.savefig("chart.png")
-        plt.show()
-
+        chart(reals,preds)
 
     else :
         print("Wrong argument")
