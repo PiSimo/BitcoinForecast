@@ -7,7 +7,7 @@ from   keras.models import Sequential
 from   keras.layers import Dense,Dropout,GRU,Reshape
 from   keras.layers.normalization import BatchNormalization
 
-file_name = 'dataset2.csv'
+file_name = 'dataset.csv'
 net = None
 wait_time = 530
 
@@ -59,7 +59,10 @@ if __name__ == '__main__':
 
     #Assembling Net:
     buildNet()
-
+    
+    #Insert dataset path:
+    file_name = input("Dataset path :")
+    
     #Loading Data (necessary also for running it to normalize data)
     print("Loading data...",end="")
     d = open(file_name,'r')
