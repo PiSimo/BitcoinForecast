@@ -12,6 +12,8 @@ Predict bitcoin value for the next 9minutes, with Recurrental Neural Network GRU
 <li><a href="http://matplotlib.org/">MatploitLib</a></li>
 </ul>
 <br />
+<h1>Model:</h1>
+<img width=300 height=700 src="https://cloud.githubusercontent.com/assets/17238972/25045757/1fb9e1c6-212e-11e7-80db-acb4665d4dbb.png">
 <h1>Instructions</h1>
 <p>Clone the repo:</p>
 <code>
