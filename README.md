@@ -13,7 +13,8 @@ Predict bitcoin value for the next 9minutes, with Recurrental Neural Network GRU
 </ul>
 <br />
 <h1>Model:</h1>
-<img width=300 height=700 src="https://cloud.githubusercontent.com/assets/17238972/25045757/1fb9e1c6-212e-11e7-80db-acb4665d4dbb.png">
+<img width=500 height=800 src="https://cloud.githubusercontent.com/assets/17238972/25045757/1fb9e1c6-212e-11e7-80db-acb4665d4dbb.png">
+<p>Generated with <a href="https://pisimo.github.io/DeepChart/">deepchart</a></p>
 <h1>Instructions</h1>
 <p>Clone the repo:</p>
 <code>
