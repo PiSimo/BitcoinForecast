@@ -1,5 +1,6 @@
 import util
 import time
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from   sys import argv,exit
@@ -39,7 +40,7 @@ def chart(real,predicted,show=True):
     if show:plt.show()
 
 def predictFuture(m1,m2,old_pred,writeToFile=False):
-    actual,latest_p = util.getCurrentData(label=True,toFile=True)
+    actual,latest_p = util.getCurrentData(label=True,toFile=False)
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
     pred = float(int(pred[0]*100)/100)
@@ -51,19 +52,21 @@ def predictFuture(m1,m2,old_pred,writeToFile=False):
     print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
     return latest_p,pred
 
-
 if __name__ == '__main__':
-    if len(argv) != 2:
-        print(argv[0]+" train/run")
-        exit(-1)
+    parser = argparse.ArgumentParser(description="Forecast btc price with deep learning.")
+    parser.add_argument('-train',type=str,help="-train dataset.csv path")
+    parser.add_argument('-run',type=str,help="-run dataset.csv path")
+    parser.add_argument('-model',type=str,help='-model model\'s path')
+    parser.add_argument('-iterations',type=int,help='-iteration number of epoches')
+    parser.add_argument('-finetune',type=str,help='-finetune base-model path')
+    args = parser.parse_args()
+    print(args)
+
 
     #Assembling Net:
     buildNet()
-    
-    #Insert dataset path:
-    file_name = input("Dataset path :")
-    
-    #Loading Data (necessary also for running it to normalize data)
+    #data loading:
+    file_name = args.run if args.run is not None else args.train
     print("Loading data...",end="")
     d = open(file_name,'r')
     data,labels = util.loadData(d)
@@ -71,9 +74,9 @@ if __name__ == '__main__':
     labels,m1,m2 =util.reduceVector(labels,getVal=True)
     print("{} chunk loaded!\n".format(len(labels)),end="")
 
-    if argv[1] == 'run':
+    if args.run is not None:
         #Loading weights
-        w_name = input("Weight file:")
+        w_name = args.model
         net.load_weights(w_name)
         print("Starting main loop...")
         hip = 0
@@ -102,16 +105,16 @@ if __name__ == '__main__':
 
         print("Closing..")
 
-    elif argv[1] == 'train':
-        cho = input("Fine tune model [yes/no] ?")
-        if cho == 'yes':
-            model_name = input('trained model\'s path:')
+    elif args.train is not None:
+        if args.finetune is not None:
+            model_name = args.finetune
             net.load_weights(model_name)
-
+            print("Basic model loaded!")
+        epochs = args.iterations
         #Training dnn
         print("training...")
         el = len(data)-10     #Last ten elements are for testing
-        net.fit(data[:el],labels[:el],epochs=500,batch_size=300)
+        net.fit(data[:el],labels[:el],epochs=epochs,batch_size=300)
         print("trained!\nSaving...",end="")
         net.save_weights("model.h5")
         print("saved!")
