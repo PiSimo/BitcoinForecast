@@ -22,12 +22,12 @@ git clone https://github.com/PiSimo/BitcoinForecast.git
 </code>
 <br />
 <br />
-<b>Training on new data:</b>
+<b>Training on new data:</b><br />
 <code>python3 network.py -train <i>dataset_path</i> -iterations <i>number_of_training_iterations</i></code>
 <p>To finetune the new model with an old one just add <code>-finetune <i>base_model_path</i></code> to the line above.</p>
 <p>At the end of the training you will have an updated model.h5 with the new weights and you will see a plot with the test results.</p>
 <br />
-<b>Running:</b>
+<b>Running:</b><br />
 <code>python3 network.py -run <i>dataset_path</i> -model <i>model_path</i></code>
 <p>The dataset is also required when you run, to perform normalization.</p>
 <p>To visualize a plot with the real and predicted results enter Crtl-C and type no ,the program will create chart.png with the results.</p>
