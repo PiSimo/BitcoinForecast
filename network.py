@@ -40,7 +40,7 @@ def chart(real,predicted,show=True):
     if show:plt.show()
 
 def predictFuture(m1,m2,old_pred,writeToFile=False):
-    actual,latest_p = util.getCurrentData(label=True,toFile=False)
+    actual,latest_p = util.getCurrentData(label=True)
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
     pred = float(int(pred[0]*100)/100)
