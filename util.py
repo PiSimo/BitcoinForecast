@@ -12,7 +12,7 @@ def loadData(f_name):
         data[i] = [float(x) for x in data[i]]
         label.append(data[i][len(data[i])-1])
         data[i] = data[i][0:len(data[i])-1]
-    return data[1:],label[:len(label)-1]
+    return data[2:],label[:-2]
 
 def reduceVector(vec,getVal=False):
     vect = []
