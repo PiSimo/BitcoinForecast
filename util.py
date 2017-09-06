@@ -54,13 +54,21 @@ def getCurrentData(label=False):
   data = requests.get("https://api.coinmarketcap.com/v1/ticker/bitcoin/").json()[0]
   bstamp = requests.get("https://www.bitstamp.net/api/v2/ticker/btcusd/").json()
   bkc = requests.get("https://blockchain.info/ticker").json()
+  '''
   for i in data.keys():
     if i in keys:
       vect.append(float(data[i]))
+  '''
+  for k in keys:
+    for d in data.keys():
+        if k == d:
+            vect.append(float(data[d]))
+    
   vect.append(float(bstamp["volume"]))
   vect.append(float(bstamp["vwap"]))
   vect.append(float(bkc["USD"]["sell"]))
   vect.append(float(bkc["USD"]["buy"]))
 
-  if label:return vect,float(bkc["USD"]["15m"])
-  else : return vect
+  if label:
+    return vect,float(bkc["USD"]["15m"])
+  return vect
