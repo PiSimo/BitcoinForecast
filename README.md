@@ -12,6 +12,9 @@ Predict bitcoin value for the next 9minutes, with Recurrental Neural Network GRU
 <li><a href="http://matplotlib.org/">MatploitLib</a></li>
 </ul>
 <br />
+<h1> Data </h1>
+You can download data through the <code>grabber.py</code> 
+<br/>
 <h1>Model:</h1>
 <div style="margin-left:auto;margin-right:auto;"><img width=550 height=800 src="https://cloud.githubusercontent.com/assets/17238972/25303841/4945f448-275b-11e7-8ad9-e4c9601a7d3a.png"></div>
 <p>Generated with <a href="https://pisimo.github.io/DeepChart/">deepchart</a></p>
