@@ -114,7 +114,7 @@ if __name__ == '__main__':
         #Training dnn
         print("training...")
         el = len(data)-10     #Last ten elements are for testing
-        net.fit(data[:el],labels[:el],epochs=epochs,batch_size=300)
+        net.fit(np.array(data[:el]),np.array(labels[:el]),epochs=epochs,batch_size=300)
         print("trained!\nSaving...",end="")
         net.save_weights("model.h5")
         print("saved!")
