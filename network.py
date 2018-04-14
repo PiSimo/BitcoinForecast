@@ -7,6 +7,8 @@ from   sys import argv,exit
 from   keras.models import Sequential
 from   keras.layers import Dense,Dropout,GRU,Reshape
 from   keras.layers.normalization import BatchNormalization
+import sqlite3
+conn = sqlite3.connect('data.db')
 
 file_name = 'dataset.csv'
 net = None
@@ -49,6 +51,9 @@ def predictFuture(m1,m2,old_pred,writeToFile=False):
         f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
         f.close()
 
+    c = conn.cursor()
+    c.execute("INSERT INTO predict(actual,last,target) VALUES (?,?,?)",(latest_p,old_pred,pred))
+    conn.commit()
     print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
     return latest_p,pred
 
