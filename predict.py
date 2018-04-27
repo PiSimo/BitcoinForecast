@@ -2,16 +2,21 @@
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import datetime
 
 con = sqlite3.connect('data.db')
 
-data = pd.read_sql_query("SELECT * from predict", con, index_col="created").tail(12) 
+data = pd.read_sql_query("SELECT * from predict", con, index_col="created") 
 
-print(data.head())
+#print(data.head())
 
+start = (datetime.datetime.utcnow() - datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+stop =  datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+print(start)
+print(stop)
 
-selected = data.loc[('2018-04-14 08:36:46' < data.index) & (data.index < '2018-04-27 08:36:46'),'actual']
+selected = data.loc[(start < data.index) & (data.index < stop),'actual']
+print(selected)
 selected.plot()
 plt.show()
 
