@@ -46,13 +46,14 @@ def predictFuture(m1,m2,old_pred,writeToFile=False):
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
     pred = float(int(pred[0]*100)/100)
+    cex = util.getCEXData()
     if writeToFile:
         f = open("results","a")
         f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
         f.close()
 
     c = conn.cursor()
-    c.execute("INSERT INTO predict(actual,last,target) VALUES (?,?,?)",(latest_p,old_pred,pred))
+    c.execute("INSERT INTO predict(actual,last,target,cex_ask) VALUES (?,?,?,?)",(latest_p,old_pred,pred,cex["ask"]))
     conn.commit()
     print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
     return latest_p,pred

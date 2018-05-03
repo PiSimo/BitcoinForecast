@@ -8,17 +8,17 @@ con = sqlite3.connect('data.db')
 
 data = pd.read_sql_query("SELECT * from predict", con, index_col="created") 
 
-#print(data.head())
+print(data.tail(2))
 
 start = (datetime.datetime.utcnow() - datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
 stop =  datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-print(start)
-print(stop)
+#print(start)
+#print(stop)
 
 selected = data.loc[(start < data.index) & (data.index < stop),'actual']
-print(selected)
-selected.plot()
-plt.show()
+#print(selected)
+#selected.plot()
+#plt.show()
 
 
 
