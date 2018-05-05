@@ -1,4 +1,5 @@
 import util
+import predict
 import time
 import argparse
 import numpy as np
@@ -47,15 +48,16 @@ def predictFuture(m1,m2,old_pred,writeToFile=False):
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
     pred = float(int(pred[0]*100)/100)
     cex = util.getCEXData()
+    slope,nrmse = predict.getslope(False)
     if writeToFile:
         f = open("results","a")
-        f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+        f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
         f.close()
 
     c = conn.cursor()
-    c.execute("INSERT INTO predict(actual,last,target,cex_ask) VALUES (?,?,?,?)",(latest_p,old_pred,pred,cex["ask"]))
+    c.execute("INSERT INTO predict(actual,last,target,cex_ask,slope,nrmse) VALUES (?,?,?,?,?,?)",(latest_p,old_pred,pred,cex["ask"],slope,nrmse))
     conn.commit()
-    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$ Slope:{}$ NRMSE:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred,slope,nrmse))
     return latest_p,pred
 
 if __name__ == '__main__':
