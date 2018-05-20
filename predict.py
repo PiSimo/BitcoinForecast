@@ -7,7 +7,7 @@ import numpy as np
 
 def getslope(plot=False):
   con = sqlite3.connect('data.db')
-  data = pd.read_sql_query("SELECT * from predict", con, index_col="created") 
+  data = pd.read_sql_query("SELECT rowid,* from predict", con, index_col="created") 
   print(data.tail(2))
 
   start = (datetime.datetime.utcnow() - datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -32,8 +32,8 @@ def getslope(plot=False):
       plt.plot([coefficients[0]*x + coefficients[1] for x in range(len(selected))])
       plt.show()
   except:
-    slope =0
-    nrmse  
+    slope = 0
+    nrmse = 0
   return slope,nrmse
 
 
