@@ -1,4 +1,5 @@
 import util
+import predict
 import time
 import argparse
 import numpy as np
@@ -7,6 +8,8 @@ from   sys import argv,exit
 from   keras.models import Sequential
 from   keras.layers import Dense,Dropout,GRU,Reshape
 from   keras.layers.normalization import BatchNormalization
+import sqlite3
+conn = sqlite3.connect('data.db')
 
 file_name = 'dataset.csv'
 net = None
@@ -44,12 +47,17 @@ def predictFuture(m1,m2,old_pred,writeToFile=False):
     actual = np.array(util.reduceCurrent(actual)).reshape(1,12)
     pred = util.augmentValue(net.predict(actual)[0],m1,m2)
     pred = float(int(pred[0]*100)/100)
+    cex = util.getCEXData()
+    slope,nrmse = predict.getslope(False)
     if writeToFile:
         f = open("results","a")
-        f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+        f.write("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
         f.close()
 
-    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred))
+    c = conn.cursor()
+    c.execute("INSERT INTO predict(actual,last,target,cex_ask,slope,nrmse) VALUES (?,?,?,?,?,?)",(latest_p,old_pred,pred,cex["ask"],slope,nrmse))
+    conn.commit()
+    print("[{}] Actual:{}$ Last Prediction:{}$ Next 9m:{}$ Slope:{}$ NRMSE:{}$\n".format(time.strftime("%H:%M:%S"),latest_p,old_pred,pred,slope,nrmse))
     return latest_p,pred
 
 if __name__ == '__main__':

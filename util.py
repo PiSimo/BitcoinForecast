@@ -49,6 +49,7 @@ def reduceCurrent(data):
     return data
 
 def getCurrentData(label=False):
+
   keys = ["price_usd","24h_volume_usd","market_cap_usd","available_supply","total_supply","percent_change_1h","percent_change_24h","percent_change_7d"]
   vect = []
   data = requests.get("https://api.coinmarketcap.com/v1/ticker/bitcoin/").json()[0]
@@ -69,6 +70,12 @@ def getCurrentData(label=False):
   vect.append(float(bkc["USD"]["sell"]))
   vect.append(float(bkc["USD"]["buy"]))
 
+  #print("blockchain.info ",float(bkc["USD"]["15m"]))
   if label:
     return vect,float(bkc["USD"]["15m"])
   return vect
+
+def getCEXData():
+   data = requests.get("https://cex.io/api/ticker/BTC/USD").json()
+   #print("CEX ",data)
+   return data 
